@@ -12,8 +12,9 @@ using UsersMicroservice.Services;
 
 namespace UsersMicroservice.Controllers
 {
+    [Produces("application/json")]
+    [Route("api/users")]
     [ApiController]
-    [Route("[controller]")]
     public class UsersController : ControllerBase
     {
         private readonly ILogger<UsersController> _logger;
@@ -30,7 +31,6 @@ namespace UsersMicroservice.Controllers
         /// </summary>
         [HttpPost]
         [SwaggerResponse((int)HttpStatusCode.Created, type: typeof(CreatedAtActionResult))]
-        [SwaggerResponse((int)HttpStatusCode.BadRequest, type: typeof(string))]
         [SwaggerResponse((int)HttpStatusCode.Conflict, type: typeof(string))]
         [SwaggerResponse((int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> CreateUser([FromBody] UserRequest request)
@@ -89,14 +89,14 @@ namespace UsersMicroservice.Controllers
         }
 
         /// <summary>
-        /// Updates the username of a user for the given ID
+        /// Updates a user with the given ID
         /// </summary>
         [HttpPut("{id}")]
         [SwaggerResponse((int)HttpStatusCode.BadRequest, type: typeof(string))]
+        [SwaggerResponse((int)HttpStatusCode.Conflict, type: typeof(string))]
         [SwaggerResponse((int)HttpStatusCode.NotFound, type: typeof(string))]
         [SwaggerResponse((int)HttpStatusCode.NoContent)]
         [SwaggerResponse((int)HttpStatusCode.InternalServerError)]
-        [ApiExplorerSettings(IgnoreApi = true)]
         public async Task<IActionResult> UpdateUser([FromRoute] string id, [FromBody] UserRequest request)
         {
             if (string.IsNullOrEmpty(id) || !int.TryParse(id, out int userId))
@@ -133,12 +133,12 @@ namespace UsersMicroservice.Controllers
         }
 
         /// <summary>
-        /// Deletes a user
+        /// Deletes a user with the given ID
         /// </summary>
-        [HttpDelete("{id}")]
-        [SwaggerResponse((int)HttpStatusCode.NoContent)]
+        [HttpDelete("{id}")]       
         [SwaggerResponse((int)HttpStatusCode.BadRequest, type: typeof(string))]
         [SwaggerResponse((int)HttpStatusCode.NotFound, type: typeof(string))]
+        [SwaggerResponse((int)HttpStatusCode.NoContent)]
         [SwaggerResponse((int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> DeleteUser([FromRoute] string id)
         {
