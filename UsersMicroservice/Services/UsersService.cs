@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,8 +12,8 @@ namespace UsersMicroservice.Services
     {
         Task<ServiceResponse> CreateUser(string username);
         Task<List<UserResponse>> GetAllUsers();
-        Task UpdateUser(string id, string username);
-        Task<bool> DeleteUser(string id);
+        Task<ServiceResponse> UpdateUser(int id, string username);
+        Task<bool> DeleteUser(int id);
     }
 
     public class UsersService : IUsersService
@@ -26,28 +27,88 @@ namespace UsersMicroservice.Services
 
         public async Task<ServiceResponse> CreateUser(string username)
         {
-            bool result = await _usersRepo.DoesUsernameExist(username);
-            // return conflict if username already exists
+            bool alreadyExists = await _usersRepo.DoesUsernameExist(username);
+            
+            if (alreadyExists)
+            {
+                return new ServiceResponse
+                {
+                    ResponseType = ServiceResponseType.Conflict,
+                    IsError = true,
+                    ErrorMessage = $"Username {username} already exists"
+                };
+            }
 
-            throw new NotImplementedException();
+            EF_User newUser = new EF_User
+            {
+                Username = username
+            };
+
+            await _usersRepo.CreateUser(newUser);
+
+            return new ServiceResponse { CreatedId = newUser.Id.ToString() };
         }
 
-        public Task<List<UserResponse>> GetAllUsers()
+        public async Task<List<UserResponse>> GetAllUsers()
         {
-            throw new NotImplementedException();
+            List<EF_User> users = await _usersRepo.GetAllUsers();
+
+            List<UserResponse> userResponses = new List<UserResponse>();
+
+            userResponses = users.Select(x => new UserResponse()
+            {
+                UserId = x.Id,
+                Username = x.Username
+            }).ToList();
+
+            return userResponses;
         }
 
-        public async Task UpdateUser(string id, string username)
+        public async Task<ServiceResponse> UpdateUser(int id, string username)
         {
-            bool result = await _usersRepo.DoesUsernameExist(username);
-            // return conflict if username already exists
+            bool alreadyExists = await _usersRepo.DoesUsernameExist(username);
 
-            throw new NotImplementedException();
+            if (alreadyExists)
+            {
+                return new ServiceResponse
+                {
+                    ResponseType = ServiceResponseType.Conflict,
+                    IsError = true,
+                    ErrorMessage = $"Username {username} already exists"
+                };
+            }
+
+            EF_User user = await _usersRepo.GetUserWithTracking(id);
+
+            if (user == null)
+            {
+                return new ServiceResponse
+                {
+                    ResponseType = ServiceResponseType.NotFound,
+                    IsError = true,
+                    ErrorMessage = $"User not found with given ID {id}"
+                };
+            }
+
+            user.Username = username;
+
+            await _usersRepo.UpdateContext();
+
+            return new ServiceResponse { ResponseType = ServiceResponseType.Success };
         }
 
-        public Task<bool> DeleteUser(string id)
+        public async Task<bool> DeleteUser(int id)
         {
-            throw new NotImplementedException();
+            EF_User user = await _usersRepo.GetUserWithTracking(id);
+
+            if (user == null)
+            {
+                return false;
+            }
+
+            await _usersRepo.DeleteUser(user);
+
+            return true;
         }
     }
 }

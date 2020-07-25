@@ -44,18 +44,18 @@ namespace UsersMicroservice.Controllers
                     switch (result.ResponseType)
                     {
                         case ServiceResponseType.Conflict:
-                            // log conflict
+                            _logger.LogInformation($"CreateUser returned a Conflict response: {result.ErrorMessage}");
                             return Conflict(result.ErrorMessage);
                     }
                 }
 
-                // log successful create
+                _logger.LogInformation("CreateUser was called successfully");
                 return CreatedAtAction(nameof(GetAllUsers), new { result.CreatedId });
             }
 
-            catch (Exception)
+            catch (Exception ex)
             {
-                // log exception
+                _logger.LogInformation($"CreateUser has thrown an exception {ex}");
                 return new StatusCodeResult(StatusCodes.Status500InternalServerError);
             }
         }
@@ -74,16 +74,16 @@ namespace UsersMicroservice.Controllers
 
                 if (responses == null || responses.Count == 0)
                 {
-                    // log success but none found
-                    return Ok("");
+                    _logger.LogInformation("GetAllUsers was called successfully, no users found");
+                    return Ok();
                 }
 
-                // log: GetAllUsers was called successfully
+                _logger.LogInformation("GetAllUsers was called successfully");
                 return Ok(responses);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // log exception
+                _logger.LogInformation($"GetAllUsers has thrown an exception {ex}");
                 return new StatusCodeResult(StatusCodes.Status500InternalServerError);
             }
         }
@@ -99,21 +99,35 @@ namespace UsersMicroservice.Controllers
         [ApiExplorerSettings(IgnoreApi = true)]
         public async Task<IActionResult> UpdateUser([FromRoute] string id, [FromBody] UserRequest request)
         {
-            if (string.IsNullOrEmpty(id))
+            if (string.IsNullOrEmpty(id) || !int.TryParse(id, out int userId))
             {
-                // log bad request
-                return BadRequest("User ID must be specified");
+                _logger.LogInformation("UpdateUser was called with an invalid user ID");
+                return BadRequest("User ID was either not specified or was invalid");
             }
 
             try
             {
-                await _usersService.UpdateUser(id, request.Username);
+                ServiceResponse result = await _usersService.UpdateUser(userId, request.Username);
 
+                if (result.IsError)
+                {
+                    switch (result.ResponseType)
+                    {
+                        case ServiceResponseType.Conflict:
+                            _logger.LogInformation($"UpdateUser returned a Conflict response: {result.ErrorMessage}");
+                            return Conflict(result.ErrorMessage);
+                        case ServiceResponseType.NotFound:
+                            _logger.LogInformation($"UpdateUser returned a NotFound response: {result.ErrorMessage}");
+                            return NotFound(result.ErrorMessage);
+                    }
+                }
+
+                _logger.LogInformation($"UpdateUser was called successfully for User ID {id}");
                 return NoContent();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // log exception
+                _logger.LogError($"UpdateUser has thrown an exception {ex}");
                 return new StatusCodeResult(StatusCodes.Status500InternalServerError);
             }
         }
@@ -128,28 +142,28 @@ namespace UsersMicroservice.Controllers
         [SwaggerResponse((int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> DeleteUser([FromRoute] string id)
         {
-            if (string.IsNullOrEmpty(id))
+            if (string.IsNullOrEmpty(id) || !int.TryParse(id, out int userId))
             {
-                // log bad request
-                return BadRequest("User ID must be specified");
+                _logger.LogInformation("DeleteUser was called with an invalid user ID");
+                return BadRequest("User ID was either not specified or was invalid");
             }
 
             try
             {
-                bool deleted = await _usersService.DeleteUser(id);
+                bool deleted = await _usersService.DeleteUser(userId);
 
                 if (!deleted)
                 {
-                    // log not found
-                    return NotFound();
+                    _logger.LogInformation("DeleteUser returned a NotFound response");
+                    return NotFound($"User ID {userId} not found");
                 }
 
-                // log successful delete
+                _logger.LogInformation($"DeleteUser was called successfully for User ID {id}");
                 return NoContent();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // log exception
+                _logger.LogError($"DeleteUser has thrown an exception {ex}");
                 return new StatusCodeResult(StatusCodes.Status500InternalServerError);
             }
         }
