@@ -5,11 +5,13 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using UsersMicroservice.Data;
+using UsersMicroservice.Models;
 using UsersMicroservice.Services;
 
 namespace UsersMicroservice
@@ -30,6 +32,9 @@ namespace UsersMicroservice
 
             services.AddScoped<IUsersService, UsersService>();
             services.AddScoped<IUsersRepository, UsersRepository>();
+
+            services.AddDbContext<UsersContext>(options => 
+                options.UseInMemoryDatabase(databaseName: "Users"));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
