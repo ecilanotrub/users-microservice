@@ -75,7 +75,7 @@ namespace UsersMicroservice.Controllers
                 if (responses == null || responses.Count == 0)
                 {
                     // log success but none found
-                    return Ok();
+                    return Ok("");
                 }
 
                 // log: GetAllUsers was called successfully
