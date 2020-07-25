@@ -46,7 +46,7 @@ namespace UsersMicroservice.Services
 
             await _usersRepo.CreateUser(newUser);
 
-            return new ServiceResponse { CreatedId = newUser.Id.ToString() };
+            return new ServiceResponse { ResponseType = ServiceResponseType.Success, CreatedId = newUser.Id.ToString() };
         }
 
         public async Task<List<UserResponse>> GetAllUsers()
