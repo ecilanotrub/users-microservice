@@ -9,11 +9,11 @@ namespace UsersMicroservice.Data
 {
     public interface IUsersRepository
     {
-        Task CreateUser(EF_User user);
-        Task<List<EF_User>> GetAllUsers();
-        Task<EF_User> GetUserWithTracking(int userId);
+        Task CreateUser(User user);
+        Task<List<User>> GetAllUsers();
+        Task<User> GetUserWithTracking(int userId);
         Task UpdateContext();
-        Task DeleteUser(EF_User user);
+        Task DeleteUser(User user);
         Task<bool> DoesUsernameExist(string username);
     }
 
@@ -26,24 +26,24 @@ namespace UsersMicroservice.Data
             _context = context;
         }
 
-        public async Task CreateUser(EF_User user)
+        public async Task CreateUser(User user)
         {
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
         }
 
-        public async Task<List<EF_User>> GetAllUsers()
+        public async Task<List<User>> GetAllUsers()
         {
-            List<EF_User> users = await _context.Users
+            List<User> users = await _context.Users
                 .AsNoTracking()
                 .ToListAsync();
 
             return users;
         }
 
-        public async Task<EF_User> GetUserWithTracking(int userId)
+        public async Task<User> GetUserWithTracking(int userId)
         {
-            EF_User user = await _context.Users
+            User user = await _context.Users
                 .FirstOrDefaultAsync(u => u.Id == userId);
 
             return user;
@@ -54,7 +54,7 @@ namespace UsersMicroservice.Data
             await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteUser(EF_User user)
+        public async Task DeleteUser(User user)
         {
             _context.Users.Remove(user);
             await _context.SaveChangesAsync();

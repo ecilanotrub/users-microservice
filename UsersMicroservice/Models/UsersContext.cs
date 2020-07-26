@@ -14,6 +14,6 @@ namespace UsersMicroservice.Models
 
         }
 
-        public DbSet<EF_User> Users { get; set; }
+        public DbSet<User> Users { get; set; }
     }
 }

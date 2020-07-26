@@ -39,7 +39,7 @@ namespace UsersMicroservice.Services
                 };
             }
 
-            EF_User newUser = new EF_User
+            User newUser = new User
             {
                 Username = username
             };
@@ -51,7 +51,7 @@ namespace UsersMicroservice.Services
 
         public async Task<List<UserResponse>> GetAllUsers()
         {
-            List<EF_User> users = await _usersRepo.GetAllUsers();
+            List<User> users = await _usersRepo.GetAllUsers();
 
             List<UserResponse> userResponses = new List<UserResponse>();
 
@@ -78,7 +78,7 @@ namespace UsersMicroservice.Services
                 };
             }
 
-            EF_User user = await _usersRepo.GetUserWithTracking(id);
+            User user = await _usersRepo.GetUserWithTracking(id);
 
             if (user == null)
             {
@@ -99,7 +99,7 @@ namespace UsersMicroservice.Services
 
         public async Task<bool> DeleteUser(int id)
         {
-            EF_User user = await _usersRepo.GetUserWithTracking(id);
+            User user = await _usersRepo.GetUserWithTracking(id);
 
             if (user == null)
             {

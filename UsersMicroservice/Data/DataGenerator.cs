@@ -21,12 +21,12 @@ namespace UsersMicroservice.Data
                 }
 
                 context.Users.AddRange(
-                    new EF_User
+                    new User
                     {
                         Id = 1,
                         Username = "Bob1965"
                     },
-                    new EF_User
+                    new User
                     {
                         Id = 2,
                         Username = "Alice1991"

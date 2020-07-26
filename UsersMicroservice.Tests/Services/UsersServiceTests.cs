@@ -37,7 +37,7 @@ namespace UsersMicroservice.Tests.Services
             // assert
             Assert.Equal(ServiceResponseType.Success, result.ResponseType);
             Assert.NotNull(result.CreatedId);
-            _mockRepo.Verify(r => r.CreateUser(It.IsAny<EF_User>()), Times.Once);
+            _mockRepo.Verify(r => r.CreateUser(It.IsAny<User>()), Times.Once);
         }
 
         [Fact]
@@ -45,7 +45,7 @@ namespace UsersMicroservice.Tests.Services
         {
             // arrange
             _mockRepo.Setup(r => r.GetAllUsers())
-                .ReturnsAsync(new List<EF_User>());
+                .ReturnsAsync(new List<User>());
 
             // act
             List<UserResponse> result = await _service.GetAllUsers();
@@ -78,14 +78,14 @@ namespace UsersMicroservice.Tests.Services
         {
             // arrange
             _mockRepo.Setup(r => r.GetUserWithTracking(It.IsAny<int>()))
-                .ReturnsAsync((EF_User)null);
+                .ReturnsAsync((User)null);
 
             // act
             bool result = await _service.DeleteUser(1);
 
             // assert
             Assert.False(result);
-            _mockRepo.Verify(r => r.DeleteUser(It.IsAny<EF_User>()), Times.Never);
+            _mockRepo.Verify(r => r.DeleteUser(It.IsAny<User>()), Times.Never);
         }
 
         // add further tests to improve code coverage
